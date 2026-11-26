@@ -28,3 +28,4 @@ router.delete('/:id', clienteController.eliminarCliente);
 
 // Exportar las rutas
 module.exports = router;
+

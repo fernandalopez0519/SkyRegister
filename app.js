@@ -5,37 +5,30 @@
  * Descripción: Configuración principal del servidor.
  */
 
-// Importar Express
 const express = require('express');
+const path = require('path');
 
-// Importar las rutas de clientes
 const clienteRoutes = require('./src/routes/clienteRoutes');
 
-// Crear la aplicación
 const app = express();
-
-// Definir el puerto
 const PORT = 3000;
 
-// Configurar recepción de datos JSON
+// Configuración para recibir datos
 app.use(express.json());
-
-// Registrar las rutas de clientes
-app.use('/clientes', clienteRoutes);
-
-// Configurar recepción de datos de formularios
 app.use(express.urlencoded({ extended: true }));
+
+// Publicar los archivos de la interfaz
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Rutas del módulo de clientes
+app.use('/clientes', clienteRoutes);
 
 // Ruta principal
 app.get('/', (req, res) => {
-    res.send(`
-        <h1>Bienvenido a SkyRegister</h1>
-        <p>Sistema de gestión de servicios audiovisuales con drones.</p>
-        <p>Servidor funcionando correctamente.</p>
-    `);
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Iniciar el servidor
+// Iniciar servidor
 app.listen(PORT, () => {
     console.log(`SkyRegister funcionando en http://localhost:${PORT}`);
 });
