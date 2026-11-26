@@ -1,4 +1,3 @@
-
 /*
  * Proyecto: SkyRegister
  * Archivo: clientes.js
@@ -86,7 +85,8 @@ function renderizarClientes(lista = clientes) {
     `).join('');
 
     if (contadorClientes) {
-        contadorClientes.textContent = `Mostrando ${lista.length} clientes`;
+        contadorClientes.textContent =
+            `Mostrando ${lista.length} clientes`;
     }
 }
 
@@ -121,16 +121,28 @@ function editarCliente(id) {
         return;
     }
 
-    document.getElementById('nombreCliente').value = cliente.nombre || '';
-    document.getElementById('documentoCliente').value = cliente.documento || '';
-    document.getElementById('telefonoCliente').value = cliente.telefono || '';
-    document.getElementById('correoCliente').value = cliente.correo || '';
-    document.getElementById('direccionCliente').value = cliente.direccion || '';
+    document.getElementById('nombreCliente').value =
+        cliente.nombre || '';
 
-    document.querySelector('#modalRegistrarCliente .modal-title').textContent =
-        'Editar Cliente';
+    document.getElementById('documentoCliente').value =
+        cliente.documento || '';
 
-    document.getElementById('modalRegistrarCliente').dataset.idCliente = id;
+    document.getElementById('telefonoCliente').value =
+        cliente.telefono || '';
+
+    document.getElementById('correoCliente').value =
+        cliente.correo || '';
+
+    document.getElementById('direccionCliente').value =
+        cliente.direccion || '';
+
+    document.querySelector(
+        '#modalRegistrarCliente .modal-title'
+    ).textContent = 'Editar Cliente';
+
+    document.getElementById(
+        'modalRegistrarCliente'
+    ).dataset.idCliente = id;
 
     modalRegistrarCliente.show();
 }
@@ -147,10 +159,14 @@ async function eliminarCliente(id) {
         const resultado = await respuesta.json();
 
         if (!respuesta.ok) {
-            throw new Error(resultado.mensaje || 'No fue posible eliminar el cliente.');
+            throw new Error(
+                resultado.mensaje ||
+                'No fue posible eliminar el cliente.'
+            );
         }
 
         alert('Cliente eliminado correctamente.');
+
         await cargarClientes();
 
     } catch (error) {
@@ -162,8 +178,13 @@ async function eliminarCliente(id) {
 // Inicializar interfaz
 document.addEventListener('DOMContentLoaded', () => {
 
-    const elementoModal = document.getElementById('modalRegistrarCliente');
-    const formRegistrarCliente = document.getElementById('formRegistrarCliente');
+    const elementoModal = document.getElementById(
+        'modalRegistrarCliente'
+    );
+
+    const formRegistrarCliente = document.getElementById(
+        'formRegistrarCliente'
+    );
 
     if (elementoModal) {
         modalRegistrarCliente = new bootstrap.Modal(elementoModal);
@@ -172,65 +193,114 @@ document.addEventListener('DOMContentLoaded', () => {
     // Abrir modal para registrar
     if (btnRegistrar) {
         btnRegistrar.addEventListener('click', () => {
+
             formRegistrarCliente?.reset();
+
             elementoModal.dataset.idCliente = '';
 
-            document.querySelector('#modalRegistrarCliente .modal-title').textContent =
-                'Registrar Cliente';
+            document.querySelector(
+                '#modalRegistrarCliente .modal-title'
+            ).textContent = 'Registrar Cliente';
 
             modalRegistrarCliente.show();
         });
     }
 
     // Búsqueda
-    buscarCliente?.addEventListener('input', aplicarFiltros);
+    buscarCliente?.addEventListener(
+        'input',
+        aplicarFiltros
+    );
 
     // Registrar o actualizar cliente
-    formRegistrarCliente?.addEventListener('submit', async (evento) => {
-        evento.preventDefault();
+    formRegistrarCliente?.addEventListener(
+        'submit',
+        async (evento) => {
 
-        const id = elementoModal.dataset.idCliente;
+            evento.preventDefault();
 
-        const nuevoCliente = {
-            nombre: document.getElementById('nombreCliente').value.trim(),
-            documento: document.getElementById('documentoCliente').value.trim(),
-            telefono: document.getElementById('telefonoCliente').value.trim(),
-            correo: document.getElementById('correoCliente').value.trim(),
-            direccion: document.getElementById('direccionCliente').value.trim()
-        };
+            const id = elementoModal.dataset.idCliente;
 
-        try {
-            const respuesta = await fetch(
-                id ? `/clientes/${id}` : '/clientes',
-                {
-                    method: id ? 'PUT' : 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(nuevoCliente)
-                }
+            const nuevoCliente = {
+                nombre: document.getElementById(
+                    'nombreCliente'
+                ).value.trim(),
+
+                documento: document.getElementById(
+                    'documentoCliente'
+                ).value.trim(),
+
+                telefono: document.getElementById(
+                    'telefonoCliente'
+                ).value.trim(),
+
+                correo: document.getElementById(
+                    'correoCliente'
+                ).value.trim(),
+
+                direccion: document.getElementById(
+                    'direccionCliente'
+                ).value.trim()
+            };
+
+            // Validar documento duplicado
+            const documentoDuplicado = clientes.some(
+                cliente =>
+                    cliente.documento.trim().toLowerCase() ===
+                    nuevoCliente.documento.toLowerCase() &&
+                    Number(cliente.id_cliente) !== Number(id)
             );
 
-            const resultado = await respuesta.json();
-
-            if (!respuesta.ok) {
-                throw new Error(resultado.mensaje || 'Error al guardar el cliente.');
+            if (documentoDuplicado) {
+                alert(
+                    'Ya existe un cliente registrado con esta identificación.'
+                );
+                return;
             }
 
-            alert(id ? 'Cliente actualizado correctamente.' :
-                'Cliente registrado correctamente.');
+            try {
+                const respuesta = await fetch(
+                    id ? `/clientes/${id}` : '/clientes',
+                    {
+                        method: id ? 'PUT' : 'POST',
 
-            formRegistrarCliente.reset();
-            elementoModal.dataset.idCliente = '';
-            modalRegistrarCliente.hide();
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
 
-            await cargarClientes();
+                        body: JSON.stringify(nuevoCliente)
+                    }
+                );
 
-        } catch (error) {
-            alert(error.message);
-            console.error(error);
+                const resultado = await respuesta.json();
+
+                if (!respuesta.ok) {
+                    throw new Error(
+                        resultado.mensaje ||
+                        'Error al guardar el cliente.'
+                    );
+                }
+
+                alert(
+                    id
+                        ? 'Cliente actualizado correctamente.'
+                        : 'Cliente registrado correctamente.'
+                );
+
+                formRegistrarCliente.reset();
+
+                elementoModal.dataset.idCliente = '';
+
+                modalRegistrarCliente.hide();
+
+                await cargarClientes();
+
+            } catch (error) {
+                alert(error.message);
+                console.error(error);
+            }
         }
-    });
+    );
 
     // Cargar información inicial
     cargarClientes();
